@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Cosmic Dolphin
+  version: 0.0.0
+servers:
+- url: /
+tags:
+- name: Notes
+- name: Documents
+paths:
+  /insert-document:
+    post:
+      operationId: DocumentService_insertDocument
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertDocumentRequest'
+        required: true
+      responses:
+        "204":
+          description: "There is no content to send for this request, but the headers\
+            \ may be useful. "
+      security:
+      - BearerAuth: []
+      tags:
+      - Documents
+  /notes:
+    get:
+      operationId: Notes_list
+      parameters: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Note'
+                type: array
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+    post:
+      operationId: Notes_create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded and a new resource has been created
+            as a result.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /notes/stream:
+    get:
+      operationId: NotesWebSocket_websocketConnection
+      parameters: []
+      responses:
+        "204":
+          description: "There is no content to send for this request, but the headers\
+            \ may be useful. "
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /notes/{id}:
+    get:
+      operationId: Notes_read
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+components:
+  schemas:
+    CosmicError:
+      example:
+        code: 1
+        message: message
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    CreateNoteRequest:
+      example:
+        body: body
+        type: fup
+      properties:
+        body:
+          type: string
+        type:
+          $ref: '#/components/schemas/NoteType'
+      required:
+      - body
+      - type
+      type: object
+    InsertDocumentRequest:
+      example:
+        source: source
+        type: webpage
+      properties:
+        type:
+          enum:
+          - webpage
+          type: string
+        source:
+          type: string
+      required:
+      - source
+      - type
+      type: object
+    Note:
+      example:
+        summary: summary
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        documentId: 6
+        id: 0
+        title: title
+        userId: userId
+        sections:
+        - type: text
+          content:
+            key: content
+        - type: text
+          content:
+            key: content
+        tags: tags
+      properties:
+        id:
+          format: int64
+          type: integer
+        documentId:
+          format: int64
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        tags:
+          type: string
+        sections:
+          items:
+            $ref: '#/components/schemas/NoteSection'
+          type: array
+        userId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - sections
+      - summary
+      - tags
+      - title
+      - userId
+      type: object
+    NoteSection:
+      example:
+        type: text
+        content:
+          key: content
+      properties:
+        type:
+          $ref: '#/components/schemas/NoteSectionType'
+        content:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - content
+      - type
+      type: object
+    NoteSectionType:
+      enum:
+      - text
+      type: string
+    NoteType:
+      enum:
+      - fup
+      - textReview
+      type: string
+    WebSocketMessage:
+      properties:
+        event:
+          type: string
+        data:
+          $ref: '#/components/schemas/WebSocketMessage_data'
+      required:
+      - data
+      - event
+      type: object
+    WebSocketMessage_data:
+      anyOf:
+      - $ref: '#/components/schemas/Note'
+      - type: string
+  securitySchemes:
+    BearerAuth:
+      scheme: bearer
+      type: http
