@@ -1,0 +1,344 @@
+openapi: 3.0.0
+info:
+  title: Cosmic Dolphin
+  version: 0.0.0
+servers:
+- url: /
+tags:
+- name: Notes
+- name: Pipelines
+paths:
+  /notes:
+    get:
+      operationId: Notes_findAll
+      parameters: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Note'
+                type: array
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+    post:
+      operationId: Notes_create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded and a new resource has been created
+            as a result.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /notes/{id}:
+    get:
+      operationId: Notes_findById
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /pipelines/{refId}:
+    get:
+      operationId: Pipelines_findByRefId
+      parameters:
+      - explode: false
+        in: path
+        name: refId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Pipeline'
+                type: array
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Pipelines
+components:
+  schemas:
+    CosmicError:
+      example:
+        code: 2
+        message: message
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    CreateNoteRequest:
+      example:
+        body: body
+        type: fup
+      properties:
+        body:
+          type: string
+        type:
+          $ref: '#/components/schemas/NoteType'
+      required:
+      - body
+      - type
+      type: object
+    Note:
+      example:
+        summary: summary
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        pipelines:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          stages:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            name: name
+            id: 5
+            key: key
+            status: pending
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            name: name
+            id: 5
+            key: key
+            status: pending
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          id: 1
+          refId: 5
+          status: null
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          stages:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            name: name
+            id: 5
+            key: key
+            status: pending
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            name: name
+            id: 5
+            key: key
+            status: pending
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          id: 1
+          refId: 5
+          status: null
+        documentId: 6
+        id: 0
+        title: title
+        type: fup
+        userId: userId
+        sections:
+        - type: text
+          content:
+            key: content
+        - type: text
+          content:
+            key: content
+        tags: tags
+      properties:
+        id:
+          format: int64
+          type: integer
+        documentId:
+          format: int64
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        tags:
+          type: string
+        type:
+          $ref: '#/components/schemas/NoteType'
+        sections:
+          items:
+            $ref: '#/components/schemas/NoteSection'
+          type: array
+        userId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        pipelines:
+          items:
+            $ref: '#/components/schemas/Pipeline'
+          type: array
+      required:
+      - createdAt
+      - pipelines
+      - sections
+      - summary
+      - tags
+      - title
+      - type
+      - userId
+      type: object
+    NoteSection:
+      example:
+        type: text
+        content:
+          key: content
+      properties:
+        type:
+          $ref: '#/components/schemas/NoteSectionType'
+        content:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - content
+      - type
+      type: object
+    NoteSectionType:
+      enum:
+      - text
+      type: string
+    NoteType:
+      enum:
+      - fup
+      - chatter
+      - knowledge
+      - task
+      type: string
+    Pipeline:
+      allOf:
+      - additionalProperties: {}
+        type: object
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        stages:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          name: name
+          id: 5
+          key: key
+          status: pending
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          name: name
+          id: 5
+          key: key
+          status: pending
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        id: 1
+        refId: 5
+        status: null
+      properties:
+        id:
+          format: int64
+          type: integer
+        refId:
+          format: int64
+          type: integer
+        stages:
+          items:
+            $ref: '#/components/schemas/PipelineStage'
+          type: array
+        status:
+          $ref: '#/components/schemas/PipelineStatus'
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - stages
+      - status
+      type: object
+    PipelineStage:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: 5
+        key: key
+        status: pending
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        key:
+          type: string
+        status:
+          $ref: '#/components/schemas/PipelineStatus'
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - key
+      - name
+      - status
+      - updatedAt
+      type: object
+    PipelineStatus:
+      enum:
+      - pending
+      - running
+      - complete
+      - failed
+      type: string
+  securitySchemes:
+    BearerAuth:
+      scheme: bearer
+      type: http
