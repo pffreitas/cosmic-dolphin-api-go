@@ -1,0 +1,946 @@
+openapi: 3.0.0
+info:
+  title: Cosmic Dolphin
+  version: 0.0.0
+servers:
+- url: /
+tags:
+- name: Notes
+- name: Pipelines
+- name: Bookmarks
+paths:
+  /bookmarks:
+    get:
+      description: Get user's bookmarks
+      operationId: Bookmarks_list
+      parameters:
+      - description: Filter bookmarks by collection ID
+        explode: false
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Maximum number of bookmarks to return
+        explode: false
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          type: integer
+        style: form
+      - description: Number of bookmarks to skip
+        explode: false
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetBookmarksResponse'
+          description: The request has succeeded.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: Server error
+      security:
+      - BearerAuth: []
+      tags:
+      - Bookmarks
+    post:
+      description: Create a new bookmark
+      operationId: Bookmarks_create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookmarkRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBookmarkResponse'
+          description: The request has succeeded and a new resource has been created
+            as a result.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: The server could not understand the request due to invalid
+            syntax.
+        "408":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: Client error
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: The request conflicts with the current state of the server.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: Client error
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: Server error
+      security:
+      - BearerAuth: []
+      tags:
+      - Bookmarks
+  /bookmarks/{id}:
+    get:
+      description: Get a bookmark by ID
+      operationId: Bookmarks_findById
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+          description: The request has succeeded.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: The server cannot find the requested resource.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkError'
+          description: Server error
+      security:
+      - BearerAuth: []
+      tags:
+      - Bookmarks
+  /notes:
+    get:
+      operationId: Notes_findAll
+      parameters: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Note'
+                type: array
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+    post:
+      operationId: Notes_create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded and a new resource has been created
+            as a result.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /notes/{id}:
+    get:
+      operationId: Notes_findById
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Notes
+  /pipelines/{refId}:
+    get:
+      operationId: Pipelines_findByRefId
+      parameters:
+      - explode: false
+        in: path
+        name: refId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Pipeline'
+                type: array
+          description: The request has succeeded.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicError'
+          description: An unexpected error response.
+      security:
+      - BearerAuth: []
+      tags:
+      - Pipelines
+components:
+  parameters:
+    GetBookmarksQuery.collection_id:
+      description: Filter bookmarks by collection ID
+      explode: false
+      in: query
+      name: collection_id
+      required: false
+      schema:
+        type: string
+      style: form
+    GetBookmarksQuery.limit:
+      description: Maximum number of bookmarks to return
+      explode: false
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        type: integer
+      style: form
+    GetBookmarksQuery.offset:
+      description: Number of bookmarks to skip
+      explode: false
+      in: query
+      name: offset
+      required: false
+      schema:
+        default: 0
+        format: int32
+        type: integer
+      style: form
+  schemas:
+    Bookmark:
+      example:
+        sourceUrl: sourceUrl
+        cosmicTags:
+        - cosmicTags
+        - cosmicTags
+        metadata:
+          readingTime: 6
+          wordCount: 0
+          openGraph:
+            article_modified_time: article_modified_time
+            image: image
+            favicon: favicon
+            description: description
+            title: title
+            type: type
+            locale: locale
+            url: url
+            site_name: site_name
+            article_published_time: article_published_time
+            article_section: article_section
+            article_author: article_author
+            article_tag:
+            - article_tag
+            - article_tag
+        isArchived: true
+        cosmicImages:
+        - description: description
+          title: title
+          url: url
+        - description: description
+          title: title
+          url: url
+        id: id
+        title: title
+        cosmicLinks:
+        - url: url
+          relevance: relevance
+        - url: url
+          relevance: relevance
+        collectionId: collectionId
+        userId: userId
+        cosmicSummary: cosmicSummary
+        isFavorite: true
+      properties:
+        id:
+          type: string
+        sourceUrl:
+          type: string
+        collectionId:
+          type: string
+        title:
+          type: string
+        isArchived:
+          type: boolean
+        isFavorite:
+          type: boolean
+        cosmicImages:
+          items:
+            $ref: '#/components/schemas/BookmarkImage'
+          type: array
+        cosmicLinks:
+          items:
+            $ref: '#/components/schemas/BookmarkLink'
+          type: array
+        cosmicSummary:
+          type: string
+        cosmicTags:
+          items:
+            type: string
+          type: array
+        metadata:
+          $ref: '#/components/schemas/BookmarkMetadata'
+        userId:
+          type: string
+      required:
+      - id
+      - sourceUrl
+      - userId
+      type: object
+    BookmarkError:
+      example:
+        error: error
+      properties:
+        error:
+          type: string
+      required:
+      - error
+      type: object
+    BookmarkImage:
+      example:
+        description: description
+        title: title
+        url: url
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - title
+      - url
+      type: object
+    BookmarkLink:
+      example:
+        url: url
+        relevance: relevance
+      properties:
+        url:
+          type: string
+        relevance:
+          type: string
+      required:
+      - relevance
+      - url
+      type: object
+    BookmarkMetadata:
+      example:
+        readingTime: 6
+        wordCount: 0
+        openGraph:
+          article_modified_time: article_modified_time
+          image: image
+          favicon: favicon
+          description: description
+          title: title
+          type: type
+          locale: locale
+          url: url
+          site_name: site_name
+          article_published_time: article_published_time
+          article_section: article_section
+          article_author: article_author
+          article_tag:
+          - article_tag
+          - article_tag
+      properties:
+        openGraph:
+          $ref: '#/components/schemas/OpenGraphMetadata'
+        wordCount:
+          format: int32
+          type: integer
+        readingTime:
+          format: int32
+          type: integer
+      type: object
+    Collection:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+        parentId:
+          type: string
+        userId:
+          type: string
+        isPublic:
+          type: boolean
+      required:
+      - id
+      - name
+      - userId
+      type: object
+    CosmicError:
+      example:
+        code: 5
+        message: message
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    CreateBookmarkRequest:
+      example:
+        collection_id: collection_id
+        source_url: source_url
+      properties:
+        source_url:
+          description: The source URL to bookmark
+          type: string
+        collection_id:
+          description: Optional collection ID to add the bookmark to
+          type: string
+      required:
+      - source_url
+      type: object
+    CreateBookmarkResponse:
+      example:
+        bookmark:
+          sourceUrl: sourceUrl
+          cosmicTags:
+          - cosmicTags
+          - cosmicTags
+          metadata:
+            readingTime: 6
+            wordCount: 0
+            openGraph:
+              article_modified_time: article_modified_time
+              image: image
+              favicon: favicon
+              description: description
+              title: title
+              type: type
+              locale: locale
+              url: url
+              site_name: site_name
+              article_published_time: article_published_time
+              article_section: article_section
+              article_author: article_author
+              article_tag:
+              - article_tag
+              - article_tag
+          isArchived: true
+          cosmicImages:
+          - description: description
+            title: title
+            url: url
+          - description: description
+            title: title
+            url: url
+          id: id
+          title: title
+          cosmicLinks:
+          - url: url
+            relevance: relevance
+          - url: url
+            relevance: relevance
+          collectionId: collectionId
+          userId: userId
+          cosmicSummary: cosmicSummary
+          isFavorite: true
+        message: message
+      properties:
+        bookmark:
+          $ref: '#/components/schemas/Bookmark'
+        message:
+          type: string
+      required:
+      - bookmark
+      - message
+      type: object
+    CreateNoteRequest:
+      example:
+        body: body
+        type: fup
+      properties:
+        body:
+          type: string
+        type:
+          $ref: '#/components/schemas/NoteType'
+      required:
+      - body
+      - type
+      type: object
+    GetBookmarksResponse:
+      example:
+        bookmarks:
+        - sourceUrl: sourceUrl
+          cosmicTags:
+          - cosmicTags
+          - cosmicTags
+          metadata:
+            readingTime: 6
+            wordCount: 0
+            openGraph:
+              article_modified_time: article_modified_time
+              image: image
+              favicon: favicon
+              description: description
+              title: title
+              type: type
+              locale: locale
+              url: url
+              site_name: site_name
+              article_published_time: article_published_time
+              article_section: article_section
+              article_author: article_author
+              article_tag:
+              - article_tag
+              - article_tag
+          isArchived: true
+          cosmicImages:
+          - description: description
+            title: title
+            url: url
+          - description: description
+            title: title
+            url: url
+          id: id
+          title: title
+          cosmicLinks:
+          - url: url
+            relevance: relevance
+          - url: url
+            relevance: relevance
+          collectionId: collectionId
+          userId: userId
+          cosmicSummary: cosmicSummary
+          isFavorite: true
+        - sourceUrl: sourceUrl
+          cosmicTags:
+          - cosmicTags
+          - cosmicTags
+          metadata:
+            readingTime: 6
+            wordCount: 0
+            openGraph:
+              article_modified_time: article_modified_time
+              image: image
+              favicon: favicon
+              description: description
+              title: title
+              type: type
+              locale: locale
+              url: url
+              site_name: site_name
+              article_published_time: article_published_time
+              article_section: article_section
+              article_author: article_author
+              article_tag:
+              - article_tag
+              - article_tag
+          isArchived: true
+          cosmicImages:
+          - description: description
+            title: title
+            url: url
+          - description: description
+            title: title
+            url: url
+          id: id
+          title: title
+          cosmicLinks:
+          - url: url
+            relevance: relevance
+          - url: url
+            relevance: relevance
+          collectionId: collectionId
+          userId: userId
+          cosmicSummary: cosmicSummary
+          isFavorite: true
+      properties:
+        bookmarks:
+          items:
+            $ref: '#/components/schemas/Bookmark'
+          type: array
+      required:
+      - bookmarks
+      type: object
+    Note:
+      example:
+        summary: summary
+        createdAt: createdAt
+        resources:
+        - type: web_page
+          openGraph:
+            imageWidth: 1
+            image: image
+            articlePublishedTime: articlePublishedTime
+            description: description
+            siteName: siteName
+            type: type
+            title: title
+            imageAlt: imageAlt
+            articleModifiedTime: articleModifiedTime
+            url: url
+            imageHeight: 5
+        - type: web_page
+          openGraph:
+            imageWidth: 1
+            image: image
+            articlePublishedTime: articlePublishedTime
+            description: description
+            siteName: siteName
+            type: type
+            title: title
+            imageAlt: imageAlt
+            articleModifiedTime: articleModifiedTime
+            url: url
+            imageHeight: 5
+        documentId: 6
+        id: 0
+        title: title
+        body: body
+        type: fup
+        userId: userId
+        tags:
+        - tags
+        - tags
+      properties:
+        id:
+          format: int64
+          type: integer
+        documentId:
+          format: int64
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        body:
+          type: string
+        tags:
+          items:
+            type: string
+          type: array
+        type:
+          $ref: '#/components/schemas/NoteType'
+        userId:
+          type: string
+        createdAt:
+          type: string
+        resources:
+          items:
+            $ref: '#/components/schemas/Resource'
+          type: array
+      required:
+      - body
+      - createdAt
+      - summary
+      - title
+      - type
+      - userId
+      type: object
+    NoteSection:
+      properties:
+        type:
+          $ref: '#/components/schemas/NoteSectionType'
+        content:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - content
+      - type
+      type: object
+    NoteSectionType:
+      enum:
+      - text
+      type: string
+    NoteType:
+      enum:
+      - fup
+      - chatter
+      - knowledge
+      - task
+      type: string
+    OpenGraph:
+      example:
+        imageWidth: 1
+        image: image
+        articlePublishedTime: articlePublishedTime
+        description: description
+        siteName: siteName
+        type: type
+        title: title
+        imageAlt: imageAlt
+        articleModifiedTime: articleModifiedTime
+        url: url
+        imageHeight: 5
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        siteName:
+          type: string
+        image:
+          type: string
+        imageAlt:
+          type: string
+        imageWidth:
+          format: int32
+          type: integer
+        imageHeight:
+          format: int32
+          type: integer
+        articlePublishedTime:
+          type: string
+        articleModifiedTime:
+          type: string
+      type: object
+    OpenGraphMetadata:
+      example:
+        article_modified_time: article_modified_time
+        image: image
+        favicon: favicon
+        description: description
+        title: title
+        type: type
+        locale: locale
+        url: url
+        site_name: site_name
+        article_published_time: article_published_time
+        article_section: article_section
+        article_author: article_author
+        article_tag:
+        - article_tag
+        - article_tag
+      properties:
+        favicon:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        url:
+          type: string
+        site_name:
+          type: string
+        type:
+          type: string
+        locale:
+          type: string
+        article_author:
+          type: string
+        article_published_time:
+          type: string
+        article_modified_time:
+          type: string
+        article_section:
+          type: string
+        article_tag:
+          items:
+            type: string
+          type: array
+      type: object
+    Pipeline:
+      allOf:
+      - additionalProperties: {}
+        type: object
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        stages:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          name: name
+          id: 1
+          key: key
+          status: pending
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          name: name
+          id: 1
+          key: key
+          status: pending
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        refId: 6
+        status: null
+      properties:
+        id:
+          format: int64
+          type: integer
+        refId:
+          format: int64
+          type: integer
+        stages:
+          items:
+            $ref: '#/components/schemas/PipelineStage'
+          type: array
+        status:
+          $ref: '#/components/schemas/PipelineStatus'
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - stages
+      - status
+      type: object
+    PipelineStage:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: 1
+        key: key
+        status: pending
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        key:
+          type: string
+        status:
+          $ref: '#/components/schemas/PipelineStatus'
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+      - createdAt
+      - key
+      - name
+      - status
+      - updatedAt
+      type: object
+    PipelineStatus:
+      enum:
+      - pending
+      - running
+      - complete
+      - failed
+      type: string
+    Resource:
+      example:
+        type: web_page
+        openGraph:
+          imageWidth: 1
+          image: image
+          articlePublishedTime: articlePublishedTime
+          description: description
+          siteName: siteName
+          type: type
+          title: title
+          imageAlt: imageAlt
+          articleModifiedTime: articleModifiedTime
+          url: url
+          imageHeight: 5
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        openGraph:
+          $ref: '#/components/schemas/OpenGraph'
+      required:
+      - type
+      type: object
+    ResourceType:
+      enum:
+      - web_page
+      - image
+      type: string
+  securitySchemes:
+    BearerAuth:
+      scheme: Bearer
+      type: http
